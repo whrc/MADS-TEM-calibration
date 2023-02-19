@@ -1,0 +1,18 @@
+OF: 2.941925327831306e8
+lambda: 200000.0
+OrderedCollections.OrderedDict("cmax0" => 577.66, "cmax1" => 275.52, "cmax2" => 115.69, "cmax3" => 38.49)
+OF: 1.6976186444107646e8
+lambda: 2.0e7
+OrderedCollections.OrderedDict("cmax0" => 216.0163361903985, "cmax1" => 103.43663163890992, "cmax2" => 195.82798175181748, "cmax3" => 98.74744131439326)
+OF: 576.8846169164378
+lambda: 20000.0
+OrderedCollections.OrderedDict("cmax0" => 381.4698113924389, "cmax1" => 113.5083344237023, "cmax2" => 207.22003830856573, "cmax3" => 93.34240449767816)
+OF: 0.38719140434606464
+lambda: 0.2
+OrderedCollections.OrderedDict("cmax0" => 381.18900719446555, "cmax1" => 113.9189226599299, "cmax2" => 207.0790276750195, "cmax3" => 93.31279457996398)
+OF: 0.32148252885062983
+lambda: 0.2
+OrderedCollections.OrderedDict("cmax0" => 381.19633489805, "cmax1" => 113.93205199775838, "cmax2" => 207.0771074913196, "cmax3" => 93.31265983263685)
+OF: 0.044577184388727306
+lambda: 200.0
+OrderedCollections.OrderedDict("cmax0" => 381.1887705246807, "cmax1" => 113.93154729723669, "cmax2" => 207.0757138006737, "cmax3" => 93.3125912262882)

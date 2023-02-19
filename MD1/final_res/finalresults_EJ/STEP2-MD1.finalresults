@@ -1,0 +1,10 @@
+OF: 489.90532983087644
+lambda: NaN
+OrderedCollections.OrderedDict("nmax0" => 2.9479712420286392, "nmax1" => 1.447197985597339, "nmax2" => 1.0735907668088251, "nmax3" => 2.1000000000000014)
+OF: 4.720552130001253e6
+lambda: NaN
+OrderedCollections.OrderedDict("nmax0" => 18.007441374313615, "nmax1" => 13.284946336997775, "nmax2" => 2.432683802374024, "nmax3" => 2.1000000000000014)
+OF: 486.4228238669275
+lambda: NaN
+OrderedCollections.OrderedDict("nmax0" => 3.3837155277820643, "nmax1" => 1.545880324088402, "nmax2" =>
+ 1.0000417964322654, "nmax3" => 3.551761782562575)
