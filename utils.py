@@ -202,21 +202,9 @@ def plot_stacked_histograms(mparams,centers,y_kmeans,nbins=10,x=16,y=8,r=2,c=4,s
   return
 
 #Plot error results from iteration file in separate subplot for each run, include polynomial fit to data
-def plot_err_by_run(path,filename,err_by_run, x=16, y=8, r=3, c=4, deg=2):
+def plot_err_by_run(path,filename,err_by_run, idx, x=16, y=8, r=3, c=4, deg=2):
   #Using split iteration file data, plot error by iteration with polynomial fit(default deg=2):
   #load iteration errors:
-  e_itr=get_error(path+filename)
-  float_err_itr=[float(x) for x in e_itr]
-  rounded_err_itr=list(np.round(float_err_itr,7))
-  #find jumps in error to identify different calibration runs:
-  diff=[t - s for s, t in zip(rounded_err_itr, rounded_err_itr[1:])]
-  Q1 = np.percentile(diff, 25, interpolation = 'midpoint')
-  Q3 = np.percentile(diff, 75, interpolation = 'midpoint')
-  IQR = Q3 - Q1
-  upper = np.where(diff >= (Q3+1.5*IQR)) # index of error jumps greater than upper bound of IQR
-  #Split iteration file error data into separate calibration runs:
-  idx=list(upper[0])
-
   plt.style.use('bmh')
   plt.figure(figsize=(x,y))
   s=1
@@ -249,3 +237,4 @@ def plot_err(err):
   plt.ylabel('Error')
   plt.title('Final error for each run')
   return
+
