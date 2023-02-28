@@ -1,15 +1,23 @@
 import csv
+import os
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
+import pandas as pd
 import statistics as stat
 import math
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
 
-#read model data from csv file
-#returns dict: {'obs_id':[model values]}
-def read_csv_model(path,filename):
+#OUTDATED, function is kept for use in old code, please use read_all_csv
+def read_csv_model(filename):
+  """
+  read model data from a single csv file
+
+  Parameters: filenames: file name to be read
+
+  Returns: dict: {'obs_id':[model values]}
+  """
   mod={}
   with open(path+filename, 'r') as file:
       reader = csv.reader(file)
@@ -24,9 +32,15 @@ def read_csv_model(path,filename):
             mod[row[0]]=vals
   return mod
 
-#read param data from param csv file
-#returns dict: {'param':[optimal param values]}
-def read_csv_params(path,filename):
+#OUTDATED, function is kept for use in old code, please use read_all_csv
+def read_csv_params(filename):
+  """
+  read param data from single param csv file
+
+  Parameters: filenames: file name to be read
+
+  Returns: dict: {'param':[optimal param values]}
+  """
   mod={}
   with open(path+filename, 'r') as file:
       reader = csv.reader(file)
@@ -42,9 +56,15 @@ def read_csv_params(path,filename):
             mod[row[0]]=vals
   return mod
 
-#read error data from param csv file
-#returns list of errors as strings
-def read_csv_errors(path,filename):
+#OUTDATED, function is kept for use in old code. Please use read_all_csv_errors
+def read_csv_errors(path, filenames):
+  """
+  read error data from single param csv file
+
+  Parameters: filenames: file name to be read
+
+  Returns: list of errors as strings
+  """
   with open(path+filename, 'r') as file:
       reader = csv.reader(file)
       r=1
@@ -60,9 +80,88 @@ def read_csv_errors(path,filename):
         vals[nn]=vals[nn].replace("_3", "") 
   return vals
 
-#-------------------------------FUNCTIONS TO LOAD ITERATION FILES----------------------------------------------
+def read_all_csv_errors(path, filenames):
+  """
+  Reads multiple parameter CSV files to get error for each calibration run
+
+  Parameters:
+  path (str): Path of the folder where CSV files are located
+  filenames (list): List of file names to be read
+
+  Returns:
+  pandas.DataFrame: A list of final errors, in order of the files read
+  """
+  dfs_err = []
+  for file_name in filenames:
+    with open(path+file_name, 'r') as file:
+        reader = csv.reader(file)
+        r=1
+        for row in reader:
+          if r==1:
+            r=r+1
+            vals=row[5:]
+        #remove 'OF:' left over from iteration files
+        for nn in range(0,len(vals)):
+          vals[nn]=vals[nn].replace("OF:", "")
+          vals[nn]=vals[nn].replace("_1", "")
+          vals[nn]=vals[nn].replace("_2", "")
+          vals[nn]=vals[nn].replace("_3", "") 
+    dfs_err=dfs_err+vals
+  return dfs_err
+
+def read_all_csv(folder_path, filenames, type):
+  """
+  Reads multiple parameter CSV or model CSV files and return dataframe
+
+  Parameters:
+  type: 'params' for parameter file, 'model' for model file
+  folder_path (str): Path of the folder where CSV files are located
+  filenames (list): List of file names to be read
+
+  Returns:
+  pandas.DataFrame: A concatenated DataFrame containing all optimal parameter sets or model results
+  """
+  dfs = []
+  if type=='params':
+    idx=5     #to concatenate dataframes (col 5:end are optimal params)
+  elif type=='model':
+    idx=1     #to concatenate dataframes (col 1:end are model results)
+  # Read first file with all columns
+  file_path = os.path.join(folder_path, filenames[0])
+  if os.path.isfile(file_path) and filenames[0].endswith('.csv'):
+    df = pd.read_csv(file_path)
+    dfs.append(df)
+  else:
+    print(' '+filenames[0]+' was not found. Continuing without reading file, Check spelling and folder...')
+  # Read remaining files with model results only
+  if len(filenames)>1:
+    for file_name in filenames[1:]:
+      file_path = os.path.join(folder_path, file_name)
+      if os.path.isfile(file_path) and file_name.endswith('.csv'):
+          df = pd.read_csv(file_path)
+          if (('parameters' or 'obs_id') in df.columns) and type=='model': #double check if extra obs ID column exists
+            idx=2  
+          dfs.append(df.iloc[:,idx:])
+      else:
+        print(' '+file_name+' was not found. Continuing without reading file, Check spelling and folder...')
+      concatenated_df = pd.concat(dfs, axis=1)
+  else:
+    concatenated_df = df
+  return concatenated_df
+
+#-------------------------------FUNCTIONS TO LOAD ITERATION FILES (output from MADS)----------------------------------------------
 
 def get_optimal_sets_of_params(filename):
+  """
+  Reads optimal parameters from final results file 
+  #can probably use for interation and initial files too
+
+  Parameters:
+  filename (list): List of file name to be read
+
+  Returns:
+  dictionary of params (keys) and optimal values found (values). Order matters, optimal paramaters of index 1 for each key belong to the same run
+  """
   #we assume there are three lines per calibration - 0=OF, 1=lambda, 2=params
   with open(filename) as f:
       lines = f.readlines()
@@ -91,13 +190,30 @@ def get_optimal_sets_of_params(filename):
   return params
 
 def merge_parameter(p1,p2):
+  """
+  Merges two parameter dictionaries (from two separate calibration runs) into one
+  calibration runs must be targeting  the same quantities, and optimizing the same parameters
+
+  Parameters:
+  p1: first dictionary
+  p2: second dictionary
+
+  Returns:
+  parameter dictionary of all calibration runs
+  """
   merge_param = {**p1, **p2}
   for same_key in set(p1) & set(p2):
     merge_param[same_key] = p1[same_key]+p2[same_key]
   return merge_param
 
-#read in error from file (file name passed in as arg)
 def get_error(filename):
+  """
+  read in error from final results file
+
+  Parameters: filename
+
+  Returns: list of error from all runs in the file
+  """
   #again, assumes there are three lines - 0=OF, 1=lambda, 2=params
   with open(filename) as f:
     errors = f.readlines()
@@ -114,8 +230,18 @@ def get_error(filename):
     errors[nn]=errors[nn].replace("\n", "")
   return errors
 
-#Load error from iteration results file and identify separate runs 
+#Identification of separate runs does not work well for all cases
 def load_sort_itr_err(path,filename):
+  """
+  read in error from iteration results file and identify separate runs
+
+  Parameters: path - path to file, filename
+
+  Returns: 
+  rounded_err_itr - all error rounded
+  idx - index at which new run begins
+  err_by_run - list of each iterations error grouped by run (in order)
+  """
   #load iteration errors:
   e_itr=get_error(path+filename)
   float_err_itr=[float(x) for x in e_itr]
@@ -136,7 +262,19 @@ def load_sort_itr_err(path,filename):
 #------------------------------------PLOTTING FUNCTIONS-------------------------------------------------------------
 
 def plot_histograms(params,nbins=10,x=16,y=8,r=2,c=4):
-  #plot the optimal values
+  """
+  plot the optimal values
+
+  Parameters: 
+  params - dictionary of optimal parameters
+  nbins
+  x - width of fig
+  y - height of fig
+  r - number of rows
+  c - number of columns
+
+  Returns: histogram
+  """
   plt.figure(figsize=(x,y))
   s=1
   for item in params:
@@ -148,8 +286,18 @@ def plot_histograms(params,nbins=10,x=16,y=8,r=2,c=4):
     s+=1
   return
 
-#Use Kmeans to cluster errors, needs input of list errors converted to floats
 def get_err_clusters(float_err,n_clusters=4):
+  """
+  Use Kmeans to cluster errors, clusters in order of magnitude (0-smallest error, 3-largest)
+
+  Parameters: 
+  float_err - list of errors converted to floats
+  nclusters - number of error clusters, default is 4
+
+  Returns: 
+  y_kmeans - index of cluster each error belongs to (list)
+  centetrs - (array) center value of each error cluster
+  """
   arr=np.array(float_err)
   kmeans = KMeans(n_clusters)
   kmeans.fit(arr.reshape(-1,1))
@@ -158,8 +306,17 @@ def get_err_clusters(float_err,n_clusters=4):
   centers = sorted(centers) #do we need this line?
   return y_kmeans, centers
 
-#Organize parameters values by kmeans clusters
 def cluster_param_data(params,y_kmeans):
+  """
+  Organize parameters values by kmeans clusters
+
+  Parameters: 
+  params - dictionary of optimal parameters
+  y_kmeans - index of cluster each error belongs to (list)
+
+  Returns: 
+  zeroes, twos, ones, threes - list of optimal parameters belonging to each respective error cluster
+  """
   zeroes=[]
   ones=[]
   twos=[]
@@ -175,8 +332,23 @@ def cluster_param_data(params,y_kmeans):
       threes.append(params[v])
   return zeroes, twos, ones, threes
 
-#Stacked Plot: uses kmeans centers to plot histogram by error groups
-def plot_stacked_histograms(mparams,centers,y_kmeans,nbins=10,x=16,y=8,r=2,c=4,std=0):
+def plot_stacked_histograms(mparams,centers,y_kmeans,nbins=10,x=24,y=10,r=2,c=4,std=0):
+  """
+  plot the optimal values in a stacked histogram, where stacking color is determined by error cluster
+
+  Parameters: 
+  params - dictionary of optimal parameters
+  centetrs - (array) center value of each error cluster
+  y_kmeans - index of cluster each error belongs to (list)
+  nbins
+  x - width of fig
+  y - height of fig #default is y=5 for each row
+  r - number of rows
+  c - number of columns
+  std - standard deviation. If std of given histogram is less than this value, it will NOT be plotted
+
+  Returns: histogram
+  """
   #plot the optimal values, colors stacked by error clusters
   plt.style.use('bmh')
   plt.figure(figsize=(x,y))
@@ -201,10 +373,23 @@ def plot_stacked_histograms(mparams,centers,y_kmeans,nbins=10,x=16,y=8,r=2,c=4,s
   plt.suptitle('Optimal Parameters Classified by Errors')
   return
 
-#Plot error results from iteration file in separate subplot for each run, include polynomial fit to data
-def plot_err_by_run(path,filename,err_by_run, idx, x=16, y=8, r=3, c=4, deg=2):
+
+def plot_err_by_run(err_by_run, idx, x=24, y=8, r=3, c=4, deg=2):
+  """
+  Plot error results from iteration file in separate subplot for each run. include polynomial fit to data (future)
+
+  Parameters: 
+  err_by_run - list of each iterations error grouped by run (in order)
+  idx - index for each new calibration run from the iteration files (output of load_sort_itr_err)
+  x - width of fig
+  y - height of fig
+  r - number of rows
+  c - number of columns
+  deg - degree of curve to fit. currently not in use
+
+  Returns: figure showing evolution of error over each iteration for each independent run
+  """
   #Using split iteration file data, plot error by iteration with polynomial fit(default deg=2):
-  #load iteration errors:
   plt.style.use('bmh')
   plt.figure(figsize=(x,y))
   s=1
@@ -215,26 +400,64 @@ def plot_err_by_run(path,filename,err_by_run, idx, x=16, y=8, r=3, c=4, deg=2):
     plt.ylabel('Error (log scale)')
     plt.title('Calibration run:' + str(i+1))
     # fit polynomial to data on log scale:
-    num_itr=len(err_by_run[i])
-    x_ax=list(range(0,num_itr))
-    y_fit=np.polyfit(x_ax, np.log10(err_by_run[i]), deg)
-    y=np.poly1d(y_fit)
-    x_fit=np.linspace(0,num_itr-1,20)
-    plt.plot(x_fit, y(x_fit),'-', label='Fitted curve')
+    # num_itr=len(err_by_run[i])
+    # x_ax=list(range(0,num_itr))
+    # y_fit=np.polyfit(x_ax, np.log10(err_by_run[i]), deg)
+    # y=np.poly1d(y_fit)
+    # x_fit=np.linspace(0,num_itr-1,20)
+    # plt.plot(x_fit, y(x_fit),'-', label='Fitted curve')
     plt.tight_layout()
     # plt.legend()
     s+=1
   plt.suptitle('Error Evolution per Iteration for Each Calibration Run')
   return
 
-def plot_err(err):
+def plot_err(err, x=16, y=6):
+  """
+  Plot error results from final results of each calibration run
+  Errors are color coded by their associated error cluster
+
+  Parameters: 
+  err - list of final errors for each run
+
+  Returns: scatter plot of all final errors
+  """
   float_err=[float(x) for x in err]
   y_kmeans,centers=get_err_clusters(float_err)
-  plt.figure()
+  plt.figure(figsize=(x,y))
   plt.scatter([i for i in range(len(float_err))], float_err, c=y_kmeans)
-  # plt.plot(rounded_err,'o')
   plt.xlabel('Calibration Run')
   plt.ylabel('Error')
   plt.title('Final error for each run')
   return
+
+def match_plot(df_model,df_params, target='GPP'):
+  """
+  plot model-data match results
+
+  Parameters: 
+  df_model - dataframe of target and model data
+  df_params - dataframe of optimal paramaters
+  target - (str) targets for the calibration, example: 'VEGC/NPP'
+
+  Returns: plot with 2 figures:
+    1 - match-plot for all runs
+    2 - log scale match-plot for all runs
+  """
+  plt.style.use('bmh')
+  if ('parameters' or 'obs_id') in df_model.columns:
+    idx=1
+  else:
+    idx=0
+  all_data=idx+1
+  fig, axes = plt.subplots(nrows=1, ncols=2,figsize=(24,6))
+  # plt.tight_layout() #use ax=axes[0] to plot in subplot
+  df_model.iloc[:,all_data:].plot(logy=False, xlabel="obs_id", ylabel=target, title="model "+target, style="-", colormap='tab20b', legend=True, ax=axes[0])
+  df_model.iloc[:,idx].plot(logy=False, style="-o", color='black', ax=axes[0])
+
+  df_model.iloc[:,all_data:].plot(logy=True, xlabel="obs_id", ylabel=target, title="log-scale model "+target, style="-", colormap='tab20b', legend=True, ax=axes[1])
+  df_model.iloc[:,idx].plot(logy=True, style="-o", color='black', ax=axes[1])
+  return
+
+
 
