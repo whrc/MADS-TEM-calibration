@@ -99,7 +99,8 @@ def read_all_csv_errors(path, filenames):
         for row in reader:
           if r==1:
             r=r+1
-            vals=row[5:]
+            index = [i for i, col in enumerate(row) if 'OF' in col][0]
+          vals=row[5:]
         #remove 'OF:' left over from iteration files
         for nn in range(0,len(vals)):
           vals[nn]=vals[nn].replace("OF:", "")
@@ -121,11 +122,8 @@ def read_all_csv(folder_path, filenames, type):
   Returns:
   pandas.DataFrame: A concatenated DataFrame containing all optimal parameter sets or model results
   """
-  dfs = []
-  if type=='params':
-    idx=5     #to concatenate dataframes (col 5:end are optimal params)
-  elif type=='model':
-    idx=1     #to concatenate dataframes (col 1:end are model results)
+  dfs = [] 
+
   # Read first file with all columns
   file_path = os.path.join(folder_path, filenames[0])
   if os.path.isfile(file_path) and filenames[0].endswith('.csv'):
@@ -133,14 +131,31 @@ def read_all_csv(folder_path, filenames, type):
     dfs.append(df)
   else:
     print(' '+filenames[0]+' was not found. Continuing without reading file, Check spelling and folder...')
+
+  #find idex of first results column
+  if type=='params':
+    #to concatenate dataframes (col idx:end are optimal params)
+    results = 'OF'
+    #creates mask of all columns who's header contain "OF" (ie; results)
+    mask = df.columns.str.contains(results)
+    if mask.any():
+      idx = mask.argmax() #index of first column of results
+    else:
+      raise ValueError(f"No columns contain the substring '{results}'")
+  elif type=='model':
+    #to concatenate dataframes (col idx:end are model results)
+    #double check if extra obs ID column exists
+    if (('parameters' or 'obs_id') in df.columns) and type=='model':
+      idx=2 
+    else:
+      idx=1    
+    
   # Read remaining files with model results only
   if len(filenames)>1:
     for file_name in filenames[1:]:
       file_path = os.path.join(folder_path, file_name)
       if os.path.isfile(file_path) and file_name.endswith('.csv'):
-          df = pd.read_csv(file_path)
-          if (('parameters' or 'obs_id') in df.columns) and type=='model': #double check if extra obs ID column exists
-            idx=2  
+          df = pd.read_csv(file_path) 
           dfs.append(df.iloc[:,idx:])
       else:
         print(' '+file_name+' was not found. Continuing without reading file, Check spelling and folder...')
@@ -412,7 +427,7 @@ def plot_err_by_run(err_by_run, idx, x=24, y=8, r=3, c=4, deg=2):
   plt.suptitle('Error Evolution per Iteration for Each Calibration Run')
   return
 
-def plot_err(err, x=16, y=6):
+def plot_err(err, x=8, y=6):
   """
   Plot error results from final results of each calibration run
   Errors are color coded by their associated error cluster
@@ -458,6 +473,7 @@ def match_plot(df_model,df_params, target='GPP'):
   df_model.iloc[:,all_data:].plot(logy=True, xlabel="obs_id", ylabel=target, title="log-scale model "+target, style="-", colormap='tab20b', legend=True, ax=axes[1])
   df_model.iloc[:,idx].plot(logy=True, style="-o", color='black', ax=axes[1])
   return
+
 
 
 
