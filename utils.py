@@ -71,7 +71,7 @@ def read_csv_errors(path, filenames):
       for row in reader:
         if r==1:
           r=r+1
-          vals=row[5:]
+          vals=row[4:]
       #remove 'OF:' left over from iteration files
       for nn in range(0,len(vals)):
         vals[nn]=vals[nn].replace("OF:", "")
@@ -100,7 +100,7 @@ def read_all_csv_errors(path, filenames):
           if r==1:
             r=r+1
             index = [i for i, col in enumerate(row) if 'OF' in col][0]
-          vals=row[5:]
+          vals=row[index:]
         #remove 'OF:' left over from iteration files
         for nn in range(0,len(vals)):
           vals[nn]=vals[nn].replace("OF:", "")
@@ -166,7 +166,7 @@ def read_all_csv(folder_path, filenames, type):
 
 #-------------------------------FUNCTIONS TO LOAD ITERATION FILES (output from MADS)----------------------------------------------
 
-def get_optimal_sets_of_params(filename):
+def get_optimal_sets_of_params(path, filename):
   """
   Reads optimal parameters from final results file 
   #can probably use for interation and initial files too
@@ -175,10 +175,12 @@ def get_optimal_sets_of_params(filename):
   filename (list): List of file name to be read
 
   Returns:
-  dictionary of params (keys) and optimal values found (values). Order matters, optimal paramaters of index 1 for each key belong to the same run
+  dictionary of params (keys) and optimal values found (values). 
+  Order matters, optimal paramaters of index 1 for each key belong to the same run
   """
+  file_path = os.path.join(path, filename)
   #we assume there are three lines per calibration - 0=OF, 1=lambda, 2=params
-  with open(filename) as f:
+  with open(file_path) as f:
       lines = f.readlines()
   #for multiple optimal sets, need to loop through them all, index starts at 0
   filelength = len(lines)
@@ -221,7 +223,51 @@ def merge_parameter(p1,p2):
     merge_param[same_key] = p1[same_key]+p2[same_key]
   return merge_param
 
-def get_error(filename):
+def get_all_optimal_sets_of_params(path, filenames):
+    """
+    Reads optimal parameters from MULTIPLE final results files
+
+    Parameters:
+    filenames (list): List of file names to be read
+
+    Returns:
+    Dictionary of params (keys) and optimal values found (values). 
+    Order matters, optimal parameters of index 1 for each key belong to the same run
+    """
+    all_params = []
+    for filename in filenames:
+        file_path = os.path.join(path, filename)
+        # we assume there are three lines per calibration - 0=OF, 1=lambda, 2=params
+        with open(file_path) as f:
+            lines = f.readlines()
+        # for multiple optimal sets, need to loop through them all, index starts at 0
+        filelength = len(lines)
+        num_sets = math.floor(filelength/3) # truncate in case there's an empty extra line at end of file
+        for nn in range(1,num_sets+1):
+            del lines[(nn-1)] # delete OF line
+            del lines[(nn-1)] # delete lambda line
+        # remove formatting from iteration files
+        for nn in range(0,num_sets):
+            lines[nn]=lines[nn].replace("OrderedCollections.OrderedDict", "") 
+            lines[nn]=lines[nn].replace(" ", "")
+            lines[nn]=lines[nn].replace("\"", "")
+            lines[nn]=lines[nn].replace("\n", "")
+            lines[nn]=lines[nn].replace("(", "")
+            lines[nn]=lines[nn].replace(")", "")
+            lines[nn]= dict(subString.split("=>") for subString in lines[nn].split(","))
+        all_params.append(lines)
+
+    # merge optimal values into one key/value set in dictionary
+    # at this point, all_params is a list of sets of key:value pairs of optimal sets for each calibration run
+    # we combine all runs into one set of keys (params) with multiple optimal value to plot easier:
+    params = {}
+    for sub in all_params:
+      for sub in lines:
+        for key, val in sub.items(): 
+          params.setdefault(key, []).append(round(float(val),2))
+    return params
+
+def get_error(path, filename):
   """
   read in error from final results file
 
@@ -229,21 +275,25 @@ def get_error(filename):
 
   Returns: list of error from all runs in the file
   """
-  #again, assumes there are three lines - 0=OF, 1=lambda, 2=params
-  with open(filename) as f:
-    errors = f.readlines()
-  #for multiple optimal sets, need to loop through them all
-  filelength = len(errors)
-  num_sets = math.floor(filelength/3) #truncate in case there's an empty extra line at end of file
-  for nn in range(1,num_sets+1):
-    del errors[(nn)] #delete lambda line
-    del errors[(nn)] #delete params line
-  for nn in range(0,num_sets):
-    errors[nn]=errors[nn].replace("OF:", "") 
-    errors[nn]=errors[nn].replace(" ", "")
-    errors[nn]=errors[nn].replace("\"", "")
-    errors[nn]=errors[nn].replace("\n", "")
-  return errors
+  all_errors = []
+  for filename in filenames:
+    file_path = os.path.join(path, filename)
+    #again, assumes there are three lines - 0=OF, 1=lambda, 2=params
+    with open(file_path) as f:
+      errors = f.readlines()
+    #for multiple optimal sets, need to loop through them all
+    filelength = len(errors)
+    num_sets = math.floor(filelength/3) #truncate in case there's an empty extra line at end of file
+    for nn in range(1,num_sets+1):
+      del errors[(nn)] #delete lambda line
+      del errors[(nn)] #delete params line
+    for nn in range(0,num_sets):
+      errors[nn]=errors[nn].replace("OF:", "") 
+      errors[nn]=errors[nn].replace(" ", "")
+      errors[nn]=errors[nn].replace("\"", "")
+      errors[nn]=errors[nn].replace("\n", "")
+    all_errors=all_errors+errors
+  return all_errors
 
 #Identification of separate runs does not work well for all cases
 def load_sort_itr_err(path,filename):
@@ -397,7 +447,7 @@ def plot_err_by_run(err_by_run, idx, x=24, y=8, r=3, c=4, deg=2):
   err_by_run - list of each iterations error grouped by run (in order)
   idx - index for each new calibration run from the iteration files (output of load_sort_itr_err)
   x - width of fig
-  y - height of fig
+  y - height of fig 
   r - number of rows
   c - number of columns
   deg - degree of curve to fit. currently not in use
@@ -451,8 +501,8 @@ def match_plot(df_model,df_params, target='GPP'):
   plot model-data match results
 
   Parameters: 
-  df_model - dataframe of target and model data
-  df_params - dataframe of optimal paramaters
+  df_model - dataframe of target and model data (rows correspond to parameters, COLUMNS correspond to one simulation)
+  df_params - dataframe of optimal paramaters (currently not used)
   target - (str) targets for the calibration, example: 'VEGC/NPP'
 
   Returns: plot with 2 figures:
@@ -473,7 +523,3 @@ def match_plot(df_model,df_params, target='GPP'):
   df_model.iloc[:,all_data:].plot(logy=True, xlabel="obs_id", ylabel=target, title="log-scale model "+target, style="-", colormap='tab20b', legend=True, ax=axes[1])
   df_model.iloc[:,idx].plot(logy=True, style="-o", color='black', ax=axes[1])
   return
-
-
-
-
