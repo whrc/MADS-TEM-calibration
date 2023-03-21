@@ -499,12 +499,10 @@ def plot_err(err, x=8, y=6):
 def match_plot(df_model,df_params, target='GPP'):
   """
   plot model-data match results
-
   Parameters: 
   df_model - dataframe of target and model data (rows correspond to parameters, COLUMNS correspond to one simulation)
   df_params - dataframe of optimal paramaters (currently not used)
   target - (str) targets for the calibration, example: 'VEGC/NPP'
-
   Returns: plot with 2 figures:
     1 - match-plot for all runs
     2 - log scale match-plot for all runs
