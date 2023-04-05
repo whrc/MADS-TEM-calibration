@@ -2,12 +2,63 @@ import csv
 import os
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import r2_score,mean_squared_error
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 import pandas as pd
 import statistics as stat
 import math
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
+
+def spaghetti_match_plot(df,logy=False):
+    df.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
+    df.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red');
+    
+def plot_r2_rmse(y):
+    [n,m]=np.shape(y)
+    r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    r2=np.asarray(r2)
+    rmse=np.asarray(rmse)
+    plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
+    
+def get_params(x,y,r2lim=0.95):
+    '''
+    Inputs:
+    x: parameters dataframe 
+    y: model outputs dataframe
+    r2lim: the R square limit
+    
+    Outputs:
+    xparams: subset of the parameter > r2lim 
+    ymodel: subset of the model outputs > r2lim 
+    '''
+    [n,m]=np.shape(y)
+    r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    r2=np.asarray(r2)
+    xparams=x[r2>r2lim]
+    ymodel=y.iloc[0:-1,:][r2>r2lim]
+    
+    return xparams, ymodel
+
+def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
+    
+    tight_params, tight_model = get_params(x,y,r2lim)
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
+
+    ax1.plot(x.iloc[:,i],y.iloc[0:-1,i],'o',alpha=0.5,color='b')
+    ax1.set_xlabel(xlabel)
+    ax1.set_ylabel(ylabel)
+    ax1.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i]+1)])
+    x1=min(x.iloc[:,i])
+    x2=max(x.iloc[:,i])
+    ax1.plot(np.linspace(x1,x2,10),np.ones(10)*y.iloc[-1,i],alpha=0.5,color='black')
+
+    ax2.plot(tight_params.iloc[:,i],tight_model.iloc[:,i],'o',alpha=0.5,color='b')
+    ax2.set_xlabel(xlabel)
+    ax2.plot(np.linspace(x1,x2,10),np.ones(10)*y.iloc[-1,i],alpha=0.5,color='black')
+    ax2.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i])+1])
 
 #OUTDATED, function is kept for use in old code, please use read_all_csv
 def read_csv_model(filename):
