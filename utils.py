@@ -22,7 +22,8 @@ def plot_r2_rmse(y):
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
-def get_params(x,y,r2lim=0.95):
+def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
+    
     '''
     Inputs:
     x: parameters dataframe 
@@ -33,17 +34,12 @@ def get_params(x,y,r2lim=0.95):
     xparams: subset of the parameter > r2lim 
     ymodel: subset of the model outputs > r2lim 
     '''
+    
     [n,m]=np.shape(y)
     r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     r2=np.asarray(r2)
-    xparams=x[r2>r2lim]
-    ymodel=y.iloc[0:-1,:][r2>r2lim]
-    
-    return xparams, ymodel
-
-def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
-    
-    tight_params, tight_model = get_params(x,y,r2lim)
+    tight_params=x[r2>r2lim]
+    tight_model=y.iloc[0:-1,:][r2>r2lim]
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
 
