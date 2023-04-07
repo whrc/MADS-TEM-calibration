@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 import pandas as pd
 import statistics as stat
+import seaborn as sns
 import math
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
 
@@ -22,8 +23,7 @@ def plot_r2_rmse(y):
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
-def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
-    
+def get_params(x,y,r2lim=0.95):
     '''
     Inputs:
     x: parameters dataframe 
@@ -34,12 +34,17 @@ def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
     xparams: subset of the parameter > r2lim 
     ymodel: subset of the model outputs > r2lim 
     '''
-    
     [n,m]=np.shape(y)
     r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     r2=np.asarray(r2)
-    tight_params=x[r2>r2lim]
-    tight_model=y.iloc[0:-1,:][r2>r2lim]
+    xparams=x[r2>r2lim]
+    ymodel=y.iloc[0:-1,:][r2>r2lim]
+    
+    return xparams, ymodel
+
+def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
+    
+    tight_params, tight_model = get_params(x,y,r2lim)
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
 
@@ -591,3 +596,21 @@ def plot_paramsvstarget(x,y,r2,i=1,xlabel='nmax1',ylabel='NPP'):
     ax2.plot(np.linspace(x1,x2,10),np.ones(10)*y.iloc[-1,i],alpha=0.5,color='black')
     ax2.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i])+1])
 
+def get_output_param_corr(df_param,df_model):
+  corr_mp = pd.DataFrame(columns=df_param.columns, index=df_model.columns)
+
+  for model_col in df_model.columns:
+      for param_col in df_param.columns:
+          corr = df_model[model_col].corr(df_param[param_col])
+          corr_mp.loc[model_col, param_col] = corr
+
+  # Convert correlation matrix to float datatype
+  corr_mp = corr_mp.astype(float)
+
+  plt.figure(figsize=(10,5))
+  sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
+  plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
+  plt.ylabel("Target (Obs)", fontsize=14)
+  plt.xlabel("Parameters", fontsize=14)
+  plt.show()
+  return corr_mp
