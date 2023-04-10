@@ -9,6 +9,11 @@ import pandas as pd
 import statistics as stat
 import seaborn as sns
 import math
+from scipy.stats import linregress
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import train_test_split
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
 
 def spaghetti_match_plot(df,logy=False):
@@ -23,6 +28,34 @@ def plot_r2_rmse(y):
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
+def find_important_features(X,y,fplot=False,ylabel=''):
+    """
+    Produces rank of parameter importance for a given Sensitivty Analysis Step
+    X: sample matrix
+    y: rmse produced from above plot_r2_rmse function
+    ylabel: name of Claibration Step
+    Returns a plot of parameter importance
+    """
+  model = RandomForestRegressor()
+  # lets split sample matrix to 80% train and 20% test, can modify
+  X_train, X_test, y_train, y_test = train_test_split(X, y, 
+                                                      test_size=0.2, random_state=0)
+
+  model.fit(X_train, y_train)
+  y_pred=model.predict(X_test)
+
+  print(ylabel + f' model score on training data: {model.score(X_train, y_train)}')
+  print(ylabel + f' model score on testing data: {model.score(X_test, y_test)}')
+
+  if fplot:
+    importances = model.feature_importances_
+    indices = np.argsort(importances)
+
+    fig, ax = plt.subplots(figsize=(5, 10))
+    ax.barh(range(len(importances)), importances[indices])
+    ax.set_yticks(range(len(importances)))
+    _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
+
 def get_params(x,y,r2lim=0.95):
     '''
     Inputs:
