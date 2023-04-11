@@ -16,9 +16,24 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
 
-def spaghetti_match_plot(df,logy=False):
-    df.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
-    df.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red');
+def spaghetti_match_plot(df_x,df_y,logy=False):
+    ''' plots the spaghetti plot of modeled v.s. observed values '''
+    df_y.iloc[0:-1,:].transpose().plot(legend=False,alpha=0.5,figsize=(10,5))
+    nrange=range(len(df_x.columns))
+    ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90);
+    ax.set_xticklabels(df_x.columns,fontsize=12)
+    ax.set_xlabel("Parameters",fontsize=14)
+    ax.set_ylabel("Targets",fontsize=14)
+    
+def spaghetti_match_plot_r2(df_x,df_y,r2lim=0.5):
+    ''' plots the spaghetti plot of restricted by R^2 value modeled v.s. observed values '''
+    xparams, ymodel = get_params(df_x,df_y,r2lim)
+    ymodel.iloc[0:-1,:].transpose().plot(legend=False,alpha=0.5,figsize=(10,5))
+    nrange=range(len(df_x.columns))
+    ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90);
+    ax.set_xticklabels(df_x.columns,fontsize=12)
+    ax.set_xlabel("Parameters",fontsize=14)
+    ax.set_ylabel("Targets",fontsize=14)
     
 def plot_r2_rmse(y):
     [n,m]=np.shape(y)
@@ -36,25 +51,25 @@ def find_important_features(X,y,fplot=False,ylabel=''):
     ylabel: name of Claibration Step
     Returns a plot of parameter importance
     """
-  model = RandomForestRegressor()
-  # lets split sample matrix to 80% train and 20% test, can modify
-  X_train, X_test, y_train, y_test = train_test_split(X, y, 
+    model = RandomForestRegressor()
+    # lets split sample matrix to 80% train and 20% test, can modify
+    X_train, X_test, y_train, y_test = train_test_split(X, y, 
                                                       test_size=0.2, random_state=0)
 
-  model.fit(X_train, y_train)
-  y_pred=model.predict(X_test)
+    model.fit(X_train, y_train)
+    y_pred=model.predict(X_test)
 
-  print(ylabel + f' model score on training data: {model.score(X_train, y_train)}')
-  print(ylabel + f' model score on testing data: {model.score(X_test, y_test)}')
+    print(ylabel + f' model score on training data: {model.score(X_train, y_train)}')
+    print(ylabel + f' model score on testing data: {model.score(X_test, y_test)}')
 
-  if fplot:
-    importances = model.feature_importances_
-    indices = np.argsort(importances)
+    if fplot:
+        importances = model.feature_importances_
+        indices = np.argsort(importances)
 
-    fig, ax = plt.subplots(figsize=(5, 10))
-    ax.barh(range(len(importances)), importances[indices])
-    ax.set_yticks(range(len(importances)))
-    _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
+        fig, ax = plt.subplots(figsize=(5, 10))
+        ax.barh(range(len(importances)), importances[indices])
+        ax.set_yticks(range(len(importances)))
+        _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
 
 def get_params(x,y,r2lim=0.95):
     '''
@@ -95,6 +110,26 @@ def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
     ax2.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i])+1])
 
 #OUTDATED, function is kept for use in old code, please use read_all_csv
+
+def plot_hist_dist(df):
+    ''' plots histogram and distribution for all parameter values'''
+    
+    n=len(df.columns)
+    # crate subplots and don't share x and y axis ranges
+    fig, axes = plt.subplots(n, 2, figsize=(10,20), sharex=False, sharey=False)
+
+    # flatten the axes for easy selection from a 1d array
+    axes = axes.flat
+
+    i=0
+    for ilist in df.columns:
+        df[ilist].plot(ax=axes[i], kind='hist', ec='k')
+        df[ilist].plot(ax=axes[i+1], kind='kde',linewidth=2)
+        axes[i].set_title(ilist, fontsize=12)
+        i+=2
+
+    fig.tight_layout()
+
 def read_csv_model(filename):
   """
   read model data from a single csv file
