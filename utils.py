@@ -18,9 +18,9 @@ from sklearn.model_selection import train_test_split
 
 def spaghetti_match_plot(df_x,df_y,logy=False):
     ''' plots the spaghetti plot of modeled v.s. observed values '''
-    df_y.iloc[0:-1,:].transpose().plot(legend=False,alpha=0.5,figsize=(10,5))
+    df_y.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
     nrange=range(len(df_x.columns))
-    ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90);
+    ax = df_y.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red',xticks=nrange, rot=90);
     ax.set_xticklabels(df_x.columns,fontsize=12)
     ax.set_xlabel("Parameters",fontsize=14)
     ax.set_ylabel("Targets",fontsize=14)
@@ -109,6 +109,41 @@ def plot_paramcvstarget(x,y,i=1,r2lim=0.95,xlabel='nmax1',ylabel='NPP'):
     ax2.plot(np.linspace(x1,x2,10),np.ones(10)*y.iloc[-1,i],alpha=0.5,color='black')
     ax2.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i])+1])
 
+    
+def plot_param_target(df_x,df_y,r2lim=0.5):
+    ''' plots parameter vs model scatter plots and r2 restricted similar plot'''
+    
+    df_x_lim ,df_y_lim = get_params(df_x,df_y,r2lim)
+    
+    n=len(df_x.columns)
+    # crate subplots and don't share x and y axis ranges
+    fig, axes = plt.subplots(n, 2, figsize=(10,4*n), sharex=False, sharey=False)
+
+    # flatten the axes for easy selection from a 1d array
+    axes = axes.flat
+
+    i=0
+    j=0
+    for xlabel,ylabel in zip(df_x.columns,df_y.columns):
+        axes[i].plot(df_x.iloc[:,j],df_y.iloc[0:-1,j],'o',alpha=0.5,color='b')
+        axes[i].plot(df_x_lim.iloc[:,j],df_y_lim.iloc[:,j],'o',alpha=0.8,color='r')
+        axes[i].set_xlabel(xlabel,fontsize=12)
+        axes[i].set_ylabel(ylabel,fontsize=12)
+        axes[i].set_ylim([min(df_y.iloc[:,j])-1, max(df_y.iloc[:,j]+1)])
+        x1=min(df_x.iloc[:,j])
+        x2=max(df_x.iloc[:,j])
+        axes[i].plot(np.linspace(x1,x2,10),np.ones(10)*df_y.iloc[-1,j],alpha=0.65,color='black',linewidth=3)
+        
+        axes[i+1].plot(df_x_lim.iloc[:,j],df_y_lim.iloc[:,j],'o',alpha=0.5,color='r')
+        axes[i+1].set_xlabel(xlabel,fontsize=12)
+        axes[i+1].plot(np.linspace(x1,x2,10),np.ones(10)*df_y.iloc[-1,j],alpha=0.6,color='black',linewidth=3)
+        axes[i+1].set_ylim([min(df_y.iloc[:,j])-1, max(df_y.iloc[:,j])+1])
+        i+=2
+        j+=1
+
+    fig.tight_layout()    
+    
+    
 #OUTDATED, function is kept for use in old code, please use read_all_csv
 
 def plot_hist_dist(df):
