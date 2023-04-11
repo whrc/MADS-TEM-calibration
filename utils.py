@@ -676,7 +676,11 @@ def get_output_param_corr(df_param,df_model):
   corr_mp = corr_mp.astype(float)
 
   plt.figure(figsize=(10,5))
-  sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
+  if len(corr_mp)>14:
+    annotate=False
+  else:
+    annotate=True
+  sns.heatmap(corr_mp, cmap="YlGnBu", annot=annotate, fmt=".2f")
   plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
   plt.ylabel("Target (Obs)", fontsize=14)
   plt.xlabel("Parameters", fontsize=14)
