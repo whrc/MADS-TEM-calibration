@@ -17,40 +17,51 @@ from sklearn.model_selection import train_test_split
 #-------------------------------FUNCTIONS TO LOAD CSV FILES----------------------------------------------------
 
 def spaghetti_match_plot(df_x,df_y,logy=False):
-    ''' plots the spaghetti plot of modeled v.s. observed values '''
+    ''' plots the spaghetti plot of modeled v.s. observed values 
+        df_x: parameter dataframe
+        df_y: model output dataframe
+        logy: True enables the logplot option
+    '''
     df_y.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
-    nrange=range(len(df_x.columns))
+    nrange=range(len(df_y.columns))
     ax = df_y.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red',xticks=nrange, rot=90);
-    ax.set_xticklabels(df_x.columns,fontsize=12)
+    ax.set_xticklabels(df_y.columns,fontsize=12)
     ax.set_xlabel("Parameters",fontsize=14)
     ax.set_ylabel("Targets",fontsize=14)
     
 def spaghetti_match_plot_r2(df_x,df_y,r2lim=0.5):
-    ''' plots the spaghetti plot of restricted by R^2 value modeled v.s. observed values '''
+    ''' plots the spaghetti plot of restricted by R^2 value modeled v.s. observed values 
+        df_x: parameter dataframe
+        df_y: model output dataframe
+        r2lim: selects outputs > r2lim (-inf,1.0)
+    '''
     xparams, ymodel = get_params(df_x,df_y,r2lim)
     ymodel.iloc[0:-1,:].transpose().plot(legend=False,alpha=0.5,figsize=(10,5))
-    nrange=range(len(df_x.columns))
+    nrange=range(len(df_y.columns))
     ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90);
-    ax.set_xticklabels(df_x.columns,fontsize=12)
+    ax.set_xticklabels(df_y.columns,fontsize=12)
     ax.set_xlabel("Parameters",fontsize=14)
     ax.set_ylabel("Targets",fontsize=14)
     
-def plot_r2_rmse(y):
+def plot_r2_rmse(df_y):
+    ''' plots R2 v.s. RMSE, with the condition that last row of the dataframe are targets
+        df_y: model output dataframe
+    '''
     [n,m]=np.shape(y)
-    r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
-    rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    r2=[r2_score(df_y.iloc[i,:], df_y.iloc[-1,:]) for i in range(n-1)]
+    rmse=[mean_squared_error(df_y.iloc[i,:], df_y.iloc[-1,:]) for i in range(n-1)]
     r2=np.asarray(r2)
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
 def find_important_features(X,y,fplot=False,ylabel=''):
-    """
+    '''
     Produces rank of parameter importance for a given Sensitivty Analysis Step
     X: sample matrix
     y: rmse produced from above plot_r2_rmse function
     ylabel: name of Claibration Step
     Returns a plot of parameter importance
-    """
+    '''
     model = RandomForestRegressor()
     # lets split sample matrix to 80% train and 20% test, can modify
     X_train, X_test, y_train, y_test = train_test_split(X, y, 
@@ -710,7 +721,7 @@ def get_output_param_corr(df_param,df_model):
   # Convert correlation matrix to float datatype
   corr_mp = corr_mp.astype(float)
 
-  plt.figure(figsize=(10,5))
+  plt.figure(figsize=(15,10))
   if len(corr_mp)>14:
     annotate=False
   else:
