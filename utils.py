@@ -43,17 +43,48 @@ def spaghetti_match_plot_r2(df_x,df_y,r2lim=0.5):
     ax.set_xlabel("Parameters",fontsize=14)
     ax.set_ylabel("Targets",fontsize=14)
     
+    return
+    
 def plot_r2_rmse(df_y):
     ''' plots R2 v.s. RMSE, with the condition that last row of the dataframe are targets
         df_y: model output dataframe
     '''
-    [n,m]=np.shape(y)
+    [n,m]=np.shape(df_y)
     r2=[r2_score(df_y.iloc[i,:], df_y.iloc[-1,:]) for i in range(n-1)]
     rmse=[mean_squared_error(df_y.iloc[i,:], df_y.iloc[-1,:]) for i in range(n-1)]
     r2=np.asarray(r2)
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
+    return
+   
+def get_params_r2_rmse(x,y,r2lim=0.95):
+    '''
+    Inputs:
+    x: parameters dataframe 
+    y: model outputs dataframe
+    r2lim: the R square limit
+    
+    Outputs extended dataframe includeing R2 and RMSE:
+    xparams: subset of the parameter > r2lim 
+    ymodel: subset of the model outputs > r2lim 
+    '''
+    [n,m]=np.shape(y)
+    r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    #convert lists to pd.series 
+    df_r2 = pd.Series( r2,  name = '$R^2$'  )
+    df_rmse = pd.Series( rmse,  name = 'RMSE'  )
+    #merge r2 and rmse to the model table
+    result = pd.concat([x, df_r2], axis=1)
+    result = pd.concat([result, df_rmse], axis=1)
+    r2=np.asarray(r2)
+    #select a param and model subset for R2>r2lim 
+    xparams=result[r2>r2lim]
+    ymodel=y.iloc[0:-1,:][r2>r2lim]
+    
+    return xparams, ymodel
+
 def find_important_features(X,y,fplot=False,ylabel=''):
     '''
     Produces rank of parameter importance for a given Sensitivty Analysis Step
