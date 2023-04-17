@@ -1,0 +1,6 @@
+name,bounds,initial,cmtnum,pftnum
+micbnup,"[0.112375, 0.786625]",0.4495,1,None
+kdcrawc,"[0.15849999999999997, 1.1095000000000002]",0.634,1,None
+kdcsoma,"[0.135, 0.9450000000000001]",0.54,1,None
+kdcsompr,"[0.0005, 0.0035]",0.002,1,None
+kdcsomcr,"[1.75e-05, 0.0001225]",7e-05,1,None

@@ -3,6 +3,7 @@ import os
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import r2_score,mean_squared_error
+from sklearn.metrics import mean_absolute_percentage_error
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -72,16 +73,22 @@ def get_params_r2_rmse(x,y,r2lim=0.95):
     [n,m]=np.shape(y)
     r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    mape=[mean_absolute_percentage_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     #convert lists to pd.series 
     df_r2 = pd.Series( r2,  name = '$R^2$'  )
     df_rmse = pd.Series( rmse,  name = 'RMSE'  )
+    df_mape = pd.Series( mape,  name = 'MAPE'  )
     #merge r2 and rmse to the model table
     result = pd.concat([x, df_r2], axis=1)
     result = pd.concat([result, df_rmse], axis=1)
+    result = pd.concat([result, df_mape], axis=1)
     r2=np.asarray(r2)
     #select a param and model subset for R2>r2lim 
     xparams=result[r2>r2lim]
     ymodel=y.iloc[0:-1,:][r2>r2lim]
+    
+    return xparams, ymodel
+
     
     return xparams, ymodel
 
