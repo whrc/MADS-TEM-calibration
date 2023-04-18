@@ -2,7 +2,7 @@ import csv
 import os
 import numpy as np
 from sklearn.cluster import KMeans
-from sklearn.metrics import r2_score,mean_squared_error
+from sklearn.metrics import r2_score,mean_squared_error,mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
@@ -89,9 +89,6 @@ def get_params_r2_rmse(x,y,r2lim=0.95):
     
     return xparams, ymodel
 
-    
-    return xparams, ymodel
-
 def find_important_features(X,y,fplot=False,ylabel=''):
     '''
     Produces rank of parameter importance for a given Sensitivty Analysis Step
@@ -120,6 +117,38 @@ def find_important_features(X,y,fplot=False,ylabel=''):
         ax.set_yticks(range(len(importances)))
         _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
 
+def find_important_features_err(x,y,error='rmse'):
+    '''
+    Produces rank of parameter importance for a given Sensitivty Analysis 
+    x: sample matrix [m,n]
+    y: model outputs [m,n+1], where last row is observations
+    error: r2,rmse,mae,mape
+    Plots a parameter importance
+    '''
+    [n,m]=np.shape(y)
+    err=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    if error=='r2':
+        err=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    elif error == 'mae':
+        err=[mean_absolute_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    elif error == 'mape':
+        err=[ mean_absolute_percentage_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+ 
+    model = RandomForestRegressor()
+    
+    model.fit(x, err)
+    
+    importances = model.feature_importances_
+    indices = np.argsort(importances)
+
+    fig, ax = plt.subplots(figsize=(5, 10))
+    ax.barh(range(len(importances)), importances[indices])
+    ax.set_yticks(range(len(importances)))
+    _ = ax.set_yticklabels(np.array(x.columns)[indices]);
+    
+    return err
+
+        
 def get_params(x,y,r2lim=0.95):
     '''
     Inputs:
