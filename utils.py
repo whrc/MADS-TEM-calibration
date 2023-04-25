@@ -26,7 +26,7 @@ def spaghetti_match_plot(df_x,df_y,logy=False):
     df_y.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
     nrange=range(len(df_y.columns))
     ax = df_y.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red',xticks=nrange, rot=90);
-    ax.set_xticklabels(df_y.columns,fontsize=12)
+    ax.set_xticklabels(df_y.columns,fontsize=14)
     ax.set_xlabel("Parameters",fontsize=14)
     ax.set_ylabel("Targets",fontsize=14)
     
@@ -89,6 +89,22 @@ def get_params_r2_rmse(x,y,r2lim=0.95):
     
     return xparams, ymodel
 
+def one_to_one_match_plot(df_y):
+    ''' plots the one to one plot of modeled v.s. observed values 
+        df_y: model output dataframe with the last row targets values
+    '''
+    b=list(df_y.iloc[-1,:].values)
+    b=[b for i in range(len(df_y.iloc[0:-1,0]))]
+    df = pd.DataFrame(b)
+    model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
+    df.columns = model_name
+
+    plt.scatter(df_y.iloc[0:-1,:], df)
+    x=np.linspace(min(df_y.iloc[-1,:]), max(df_y.iloc[-1,:]),10)
+    plt.plot( x,x,'b--',alpha=0.6 )
+    plt.xlabel('Modeled',fontsize=14)
+    plt.ylabel('Targets',fontsize=14);
+
 def find_important_features(X,y,fplot=False,ylabel=''):
     '''
     Produces rank of parameter importance for a given Sensitivty Analysis Step
@@ -142,6 +158,7 @@ def find_important_features_err(x,y,error='rmse'):
     indices = np.argsort(importances)
 
     fig, ax = plt.subplots(figsize=(5, 10))
+    plt.title(error)
     ax.barh(range(len(importances)), importances[indices])
     ax.set_yticks(range(len(importances)))
     _ = ax.set_yticklabels(np.array(x.columns)[indices]);
@@ -229,7 +246,7 @@ def plot_hist_dist(df):
     
     n=len(df.columns)
     # crate subplots and don't share x and y axis ranges
-    fig, axes = plt.subplots(n, 2, figsize=(10,20), sharex=False, sharey=False)
+    fig, axes = plt.subplots(n, 2, figsize=(n,2*n), sharex=False, sharey=False)
 
     # flatten the axes for easy selection from a 1d array
     axes = axes.flat
@@ -787,11 +804,13 @@ def get_output_param_corr(df_param,df_model):
 
   # Convert correlation matrix to float datatype
   corr_mp = corr_mp.astype(float)
+  [n,m]=corr_mp.shape
 
-  plt.figure(figsize=(15,10))
+  plt.figure(figsize=(2*n,1.5*m))
+  sns.set(font_scale=1.4)
   sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
   plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
-  plt.ylabel("Target (Obs)", fontsize=14)
-  plt.xlabel("Parameters", fontsize=14)
+  plt.ylabel("Target (Obs)", fontsize=16)
+  plt.xlabel("Parameters", fontsize=16)
   plt.show()
   return corr_mp
