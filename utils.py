@@ -795,3 +795,30 @@ def get_output_param_corr(df_param,df_model):
   plt.xlabel("Parameters", fontsize=14)
   plt.show()
   return corr_mp
+
+  def plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.5):
+  # ut.plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.50)
+  corr_mask = (corr_mp > corr_thresh) | (corr_mp < (-1*corr_thresh))
+  tight_params, tight_model = get_params(df_param,df_model,r2lim=0.97)
+  x=df_param
+  y=df_model
+
+  for model_col in corr_mask.index:
+    for param_col in corr_mask.columns:
+        if corr_mask.loc[model_col, param_col]:
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
+            ax1.plot(x[param_col],y.iloc[:-1, model_col],'o',alpha=0.5,color='b')
+            ax1.set_xlabel(param_col)
+            ax1.set_ylabel(model_col)
+            ax1.set_ylim([min(df_model.iloc[:-1,model_col])-1, max(df_model.iloc[:-1,model_col]+1)])
+            x1=min(x[param_col])
+            x2=max(x[param_col])
+            ax1.plot(np.linspace(x1,x2,10),np.ones(10)*df_model.iloc[-1,model_col],alpha=0.5,color='black')
+
+            ax2.plot(tight_params[param_col],tight_model.iloc[:,model_col],'o',alpha=0.5,color='b')
+            ax2.set_xlabel(param_col)
+            ax2.plot(np.linspace(x1,x2,10),np.ones(10)*df_model.iloc[-1,model_col],alpha=0.5,color='black')
+            ax2.set_ylim([min(df_model.iloc[:,model_col])-1, max(df_model.iloc[:,model_col])+1])
+
+  plt.show()
+  return
