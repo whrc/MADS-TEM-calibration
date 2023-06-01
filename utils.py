@@ -25,10 +25,10 @@ def spaghetti_match_plot(df_x,df_y,logy=False):
     '''
     df_y.iloc[0:-1,:].transpose().plot(logy=logy,legend=False,alpha=0.5,figsize=(10,5))
     nrange=range(len(df_y.columns))
-    ax = df_y.iloc[-1,:].plot(logy=logy,legend=False,style="o",color='red',xticks=nrange, rot=90);
-    ax.set_xticklabels(df_y.columns,fontsize=14)
-    ax.set_xlabel("Parameters",fontsize=14)
-    ax.set_ylabel("Targets",fontsize=14)
+    ax = df_y.iloc[-1,:].plot(logy=logy,legend=True,style="o",color='red',xticks=nrange, rot=90, label="Targets");
+    ax.set_xticklabels(df_y.columns,fontsize=12)
+    # ax.set_xlabel("Parameters",fontsize=14)
+    # ax.set_ylabel("Targets",fontsize=14)
     
 def spaghetti_match_plot_r2(df_x,df_y,r2lim=0.5):
     ''' plots the spaghetti plot of restricted by R^2 value modeled v.s. observed values 
@@ -39,10 +39,10 @@ def spaghetti_match_plot_r2(df_x,df_y,r2lim=0.5):
     xparams, ymodel = get_params(df_x,df_y,r2lim)
     ymodel.iloc[0:-1,:].transpose().plot(legend=False,alpha=0.5,figsize=(10,5))
     nrange=range(len(df_y.columns))
-    ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90);
+    ax = df_y.iloc[-1,:].plot(legend=False,style="o",color='red',xticks=nrange, rot=90, label="Targets");
     ax.set_xticklabels(df_y.columns,fontsize=12)
-    ax.set_xlabel("Parameters",fontsize=14)
-    ax.set_ylabel("Targets",fontsize=14)
+    # ax.set_xlabel("Parameters",fontsize=14)
+    # ax.set_ylabel("Targets",fontsize=14)
     
     return
     
@@ -57,7 +57,7 @@ def plot_r2_rmse(df_y):
     rmse=np.asarray(rmse)
     plt.plot(rmse,r2,'o'), plt.xlabel('RMSE'), plt.ylabel('$R^2$');
     
-    return
+    return rmse
    
 def get_params_r2_rmse(x,y,r2lim=0.95):
     '''
@@ -96,8 +96,13 @@ def one_to_one_match_plot(df_y):
     b=list(df_y.iloc[-1,:].values)
     b=[b for i in range(len(df_y.iloc[0:-1,0]))]
     df = pd.DataFrame(b)
+<<<<<<< HEAD
     #model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
     #df.columns = model_name
+=======
+    # model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
+    # df.columns = model_name
+>>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
 
     plt.scatter(df_y.iloc[0:-1,:], df)
     x=np.linspace(min(df_y.iloc[-1,:]), max(df_y.iloc[-1,:]),10)
@@ -124,14 +129,16 @@ def find_important_features(X,y,fplot=False,ylabel=''):
     print(ylabel + f' model score on training data: {model.score(X_train, y_train)}')
     print(ylabel + f' model score on testing data: {model.score(X_test, y_test)}')
 
-    if fplot:
-        importances = model.feature_importances_
-        indices = np.argsort(importances)
+    # if fplot:
+    importances = model.feature_importances_
+    indices = np.argsort(importances)
 
-        fig, ax = plt.subplots(figsize=(5, 10))
-        ax.barh(range(len(importances)), importances[indices])
-        ax.set_yticks(range(len(importances)))
-        _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
+    fig, ax = plt.subplots(figsize=(5, 10))
+    ax.barh(range(len(importances)), importances[indices])
+    ax.set_yticks(range(len(importances)))
+    _ = ax.set_yticklabels(np.array(X_train.columns)[indices]);
+    # ax.set_xlabel("Values",fontsize=14)
+    # ax.set_ylabel("Parameters",fontsize=14)
 
 def find_important_features_err(x,y,error='rmse'):
     '''
@@ -158,10 +165,11 @@ def find_important_features_err(x,y,error='rmse'):
     indices = np.argsort(importances)
 
     fig, ax = plt.subplots(figsize=(5, 10))
-    plt.title(error)
     ax.barh(range(len(importances)), importances[indices])
     ax.set_yticks(range(len(importances)))
     _ = ax.set_yticklabels(np.array(x.columns)[indices]);
+    # ax.set_xlabel("Values",fontsize=14)
+    # ax.set_ylabel("Parameters",fontsize=14)
     
     return err
 
@@ -246,7 +254,7 @@ def plot_hist_dist(df):
     
     n=len(df.columns)
     # crate subplots and don't share x and y axis ranges
-    fig, axes = plt.subplots(n, 2, figsize=(n,2*n), sharex=False, sharey=False)
+    fig, axes = plt.subplots(n, 2, figsize=(10,20), sharex=False, sharey=False)
 
     # flatten the axes for easy selection from a 1d array
     axes = axes.flat
@@ -807,6 +815,7 @@ def get_output_param_corr(df_param,df_model,fig_size_xy=''):
           corr = df_model[model_col].corr(df_param[param_col])
           corr_mp.loc[model_col, param_col] = corr
 
+<<<<<<< HEAD
     # Convert correlation matrix to float datatype
     corr_mp = corr_mp.astype(float)
     [n,m]=corr_mp.shape
@@ -820,3 +829,69 @@ def get_output_param_corr(df_param,df_model,fig_size_xy=''):
     plt.xlabel("Parameters", fontsize=16)
     plt.show()
     return corr_mp
+=======
+  # Convert correlation matrix to float datatype
+  corr_mp = corr_mp.astype(float)
+
+  plt.figure(figsize=(15,10))
+  sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
+  plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
+  plt.ylabel("Target (Obs)", fontsize=14)
+  plt.xlabel("Parameters", fontsize=14)
+  plt.show()
+  return corr_mp
+
+# def plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.5):
+#   # ut.plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.50)
+#   corr_mask = (corr_mp > corr_thresh) | (corr_mp < (-1*corr_thresh))
+#   tight_params, tight_model = get_params(df_param,df_model,r2lim=0.97)
+#   x=df_param
+#   y=df_model
+
+#   for model_col in corr_mask.index:
+#     for param_col in corr_mask.columns:
+#         if corr_mask.loc[model_col, param_col]:
+#             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
+#             ax1.plot(x[param_col],y.iloc[:-1, model_col],'o',alpha=0.5,color='b')
+#             ax1.set_xlabel(param_col)
+#             ax1.set_ylabel(model_col)
+#             ax1.set_ylim([min(df_model.iloc[:-1,model_col])-1, max(df_model.iloc[:-1,model_col]+1)])
+#             x1=min(x[param_col])
+#             x2=max(x[param_col])
+#             ax1.plot(np.linspace(x1,x2,10),np.ones(10)*df_model.iloc[-1,model_col],alpha=0.5,color='black')
+
+#             ax2.plot(tight_params[param_col],tight_model.iloc[:,model_col],'o',alpha=0.5,color='b')
+#             ax2.set_xlabel(param_col)
+#             ax2.plot(np.linspace(x1,x2,10),np.ones(10)*df_model.iloc[-1,model_col],alpha=0.5,color='black')
+#             ax2.set_ylim([min(df_model.iloc[:,model_col])-1, max(df_model.iloc[:,model_col])+1])
+
+#   plt.show()
+#   return
+
+def plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.5):
+  # ut.plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.50)
+  corr_mask = (corr_mp > corr_thresh) | (corr_mp < (-1*corr_thresh))
+  tight_params, tight_model = get_params(df_param,df_model,r2lim=0.97)
+  x=df_param
+  y=df_model
+
+  for model_col in corr_mask.index:
+    for param_col in corr_mask.columns:
+        if corr_mask.loc[model_col, param_col]:
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
+            ax1.plot(x[param_col],y[model_col][:-1],'o',alpha=0.5,color='b')
+            ax1.set_xlabel(param_col)
+            ax1.set_ylabel(model_col)
+            ax1.set_ylim([min(df_model[model_col][:-1])-1, max(df_model[model_col][:-1]+1)])
+            x1=min(x[param_col])
+            x2=max(x[param_col])
+            ax1.plot(np.linspace(x1,x2,10),np.ones(10)*df_model[model_col].iloc[-1],alpha=0.5,color='black')
+
+            ax2.plot(tight_params[param_col],tight_model[model_col],'o',alpha=0.5,color='b')
+            ax2.set_xlabel(param_col)
+            ax2.plot(np.linspace(x1,x2,10),np.ones(10)*df_model[model_col].iloc[-1],alpha=0.5,color='black')
+            ax2.set_ylim([min(df_model[model_col])-1, max(df_model[model_col])+1])
+
+  plt.show()
+  return
+>>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
