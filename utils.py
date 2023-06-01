@@ -96,8 +96,8 @@ def one_to_one_match_plot(df_y):
     b=list(df_y.iloc[-1,:].values)
     b=[b for i in range(len(df_y.iloc[0:-1,0]))]
     df = pd.DataFrame(b)
-    model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
-    df.columns = model_name
+    #model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
+    #df.columns = model_name
 
     plt.scatter(df_y.iloc[0:-1,:], df)
     x=np.linspace(min(df_y.iloc[-1,:]), max(df_y.iloc[-1,:]),10)
@@ -794,23 +794,29 @@ def plot_paramsvstarget(x,y,r2,i=1,xlabel='nmax1',ylabel='NPP'):
     ax2.plot(np.linspace(x1,x2,10),np.ones(10)*y.iloc[-1,i],alpha=0.5,color='black')
     ax2.set_ylim([min(y.iloc[:,i])-1, max(y.iloc[:,i])+1])
 
-def get_output_param_corr(df_param,df_model):
-  corr_mp = pd.DataFrame(columns=df_param.columns, index=df_model.columns)
+def get_output_param_corr(df_param,df_model,fig_size_xy=''):
+    '''
+    df_param: parameter dataframe
+    df_model: model dataframe
+    fig_size_xy: (x_size,y_size)
+    '''
+    corr_mp = pd.DataFrame(columns=df_param.columns, index=df_model.columns)
 
-  for model_col in df_model.columns:
+    for model_col in df_model.columns:
       for param_col in df_param.columns:
           corr = df_model[model_col].corr(df_param[param_col])
           corr_mp.loc[model_col, param_col] = corr
 
-  # Convert correlation matrix to float datatype
-  corr_mp = corr_mp.astype(float)
-  [n,m]=corr_mp.shape
-
-  plt.figure(figsize=(2*n,1.5*m))
-  sns.set(font_scale=1.4)
-  sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
-  plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
-  plt.ylabel("Target (Obs)", fontsize=16)
-  plt.xlabel("Parameters", fontsize=16)
-  plt.show()
-  return corr_mp
+    # Convert correlation matrix to float datatype
+    corr_mp = corr_mp.astype(float)
+    [n,m]=corr_mp.shape
+    if fig_size_xy=='':
+      fig_size_xy=(2*n,1.5*m)   
+    plt.figure(figsize=fig_size_xy)
+    sns.set(font_scale=1.4)
+    sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
+    plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
+    plt.ylabel("Target (Obs)", fontsize=16)
+    plt.xlabel("Parameters", fontsize=16)
+    plt.show()
+    return corr_mp
