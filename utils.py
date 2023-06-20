@@ -96,13 +96,13 @@ def one_to_one_match_plot(df_y):
     b=list(df_y.iloc[-1,:].values)
     b=[b for i in range(len(df_y.iloc[0:-1,0]))]
     df = pd.DataFrame(b)
-<<<<<<< HEAD
+#<<<<<<< HEAD
     #model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
     #df.columns = model_name
-=======
+#=======
     # model_name = ['GPP0_o','GPP1_o','GPP2_o','GPP3_o']
     # df.columns = model_name
->>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
+#>>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
 
     plt.scatter(df_y.iloc[0:-1,:], df)
     x=np.linspace(min(df_y.iloc[-1,:]), max(df_y.iloc[-1,:]),10)
@@ -815,31 +815,31 @@ def get_output_param_corr(df_param,df_model,fig_size_xy=''):
           corr = df_model[model_col].corr(df_param[param_col])
           corr_mp.loc[model_col, param_col] = corr
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
     # Convert correlation matrix to float datatype
+#    corr_mp = corr_mp.astype(float)
+#    [n,m]=corr_mp.shape
+#    if fig_size_xy=='':
+#      fig_size_xy=(2*n,1.5*m)   
+#    plt.figure(figsize=fig_size_xy)
+#    sns.set(font_scale=1.4)
+#    sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
+#    plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
+#    plt.ylabel("Target (Obs)", fontsize=16)
+#    plt.xlabel("Parameters", fontsize=16)
+#    plt.show()
+#    return corr_mp
+#=======
+  # Convert correlation matrix to float datatype
     corr_mp = corr_mp.astype(float)
-    [n,m]=corr_mp.shape
-    if fig_size_xy=='':
-      fig_size_xy=(2*n,1.5*m)   
-    plt.figure(figsize=fig_size_xy)
-    sns.set(font_scale=1.4)
+
+    plt.figure(figsize=(15,10))
     sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
     plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
-    plt.ylabel("Target (Obs)", fontsize=16)
-    plt.xlabel("Parameters", fontsize=16)
+    plt.ylabel("Target (Obs)", fontsize=14)
+    plt.xlabel("Parameters", fontsize=14)
     plt.show()
     return corr_mp
-=======
-  # Convert correlation matrix to float datatype
-  corr_mp = corr_mp.astype(float)
-
-  plt.figure(figsize=(15,10))
-  sns.heatmap(corr_mp, cmap="YlGnBu", annot=True, fmt=".2f")
-  plt.title("Correlation Matrix [Target vs Params]", fontsize=16)
-  plt.ylabel("Target (Obs)", fontsize=14)
-  plt.xlabel("Parameters", fontsize=14)
-  plt.show()
-  return corr_mp
 
 # def plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.5):
 #   # ut.plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.50)
@@ -894,4 +894,4 @@ def plot_relationships(corr_mp,df_param,df_model,corr_thresh=0.5):
 
   plt.show()
   return
->>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
+#>>>>>>> 34d74953c3815634960ccd72c68c8ffb49fc1016
