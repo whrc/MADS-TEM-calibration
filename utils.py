@@ -59,12 +59,13 @@ def plot_r2_rmse(df_y):
     
     return rmse
    
-def get_params_r2_rmse(x,y,r2lim=0.95):
+def get_params_r2_rmse(x,y,r2lim=0.95,n_top_runs=None):
     '''
     Inputs:
     x: parameters dataframe 
     y: model outputs dataframe
     r2lim: the R square limit
+    n_top_runs (int): if specified, will output top n params and results based on combined accuracy (RMSE, MAPE, R2)
     
     Outputs extended dataframe includeing R2 and RMSE:
     xparams: subset of the parameter > r2lim 
@@ -74,18 +75,37 @@ def get_params_r2_rmse(x,y,r2lim=0.95):
     r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
     mape=[mean_absolute_percentage_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    
     #convert lists to pd.series 
     df_r2 = pd.Series( r2,  name = '$R^2$'  )
     df_rmse = pd.Series( rmse,  name = 'RMSE'  )
     df_mape = pd.Series( mape,  name = 'MAPE'  )
+    
+    #normalize rmse and mape between 0 and 1
+    df_rmse_normalized = pd.Series((df_rmse-np.nanmin(df_rmse))/(np.nanmax(df_rmse)-np.nanmin(df_rmse)), name='RMSE_NORM')
+    df_mape_normalized = pd.Series((df_mape-np.nanmin(df_mape))/(np.nanmax(df_mape)-np.nanmin(df_mape)), name='MAPE_NORM')
+    
+    #create combined accuracy by subtracting average of rmse and mape from r2
+    df_combined_accuracy = pd.Series(df_r2 - ((df_rmse_normalized + df_mape_normalized)/2), name='COMBINED_ACC')
+
     #merge r2 and rmse to the model table
     result = pd.concat([x, df_r2], axis=1)
     result = pd.concat([result, df_rmse], axis=1)
     result = pd.concat([result, df_mape], axis=1)
+    result = pd.concat([result, df_combined_accuracy], axis=1)
     r2=np.asarray(r2)
+    
+    #select n top runs
+    if n_top_runs != None:
+        perf = np.argsort(result['COMBINED_ACC'])[::-1]
+        top = perf[:n_top_runs].values.tolist()
+        xparams=result.iloc[top]
+        ymodel=y.iloc[0:-1,:].iloc[top]
+    
     #select a param and model subset for R2>r2lim 
-    xparams=result[r2>r2lim]
-    ymodel=y.iloc[0:-1,:][r2>r2lim]
+    else:
+        xparams=result[r2>r2lim]
+        ymodel=y.iloc[0:-1,:][r2>r2lim]
     
     return xparams, ymodel
 
