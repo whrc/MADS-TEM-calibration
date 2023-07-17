@@ -109,6 +109,66 @@ def get_params_r2_rmse(x,y,r2lim=0.95,n_top_runs=None):
     
     return xparams, ymodel
 
+def get_best_match(x,y):
+    '''
+    Inputs:
+    x: parameters dataframe 
+    y: model outputs dataframe
+
+    Metrics:
+    r2lim: the R square limit
+    rmse: root mean square 
+    mape: mean absolute precentage
+    r2rmse: combined r2 & rmse
+    r2rmsemape: combined r2, rmse, & mape
+    df_combined_accuracy: Andrew's method
+
+    Outputs extended dataframe:
+    xresult: subset of the parameter with added 5 metric columns 
+    yresult: subset of the model outputs with added 5 metric columns
+    '''
+    [n,m]=np.shape(y)
+    r2=[r2_score(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    rmse=[mean_squared_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+    mape=[mean_absolute_percentage_error(y.iloc[i,:], y.iloc[-1,:]) for i in range(n-1)]
+
+    #convert lists to pd.series 
+    df_r2 = pd.Series( r2,  name = 'R2'  )
+    df_rmse = pd.Series( rmse,  name = 'RMSE'  )
+    df_mape = pd.Series( mape,  name = 'MAPE'  )
+
+    #normalize rmse and mape between 0 and 1
+    df_rmse_normalized = pd.Series((df_rmse-np.nanmin(df_rmse))/(np.nanmax(df_rmse)-np.nanmin(df_rmse)), name='RMSE_NORM')
+    df_mape_normalized = pd.Series((df_mape-np.nanmin(df_mape))/(np.nanmax(df_mape)-np.nanmin(df_mape)), name='MAPE_NORM')
+
+    #create combined accuracy by subtracting average of rmse and mape from r2
+    df_combined_accuracy = pd.Series(df_r2 - ((df_rmse_normalized + df_mape_normalized)/2), name='COMBINED_ACC')
+
+    #merge r2, rmse, and others to the model table
+    xresult = pd.concat([x, df_r2], axis=1)
+    yresult = pd.concat([y.iloc[0:-1,:], df_r2], axis=1)
+    xresult = pd.concat([xresult, df_rmse], axis=1)
+    yresult = pd.concat([yresult, df_rmse], axis=1)
+    xresult = pd.concat([xresult, df_mape], axis=1)
+    yresult = pd.concat([yresult, df_mape], axis=1)
+    xresult = pd.concat([xresult, df_combined_accuracy], axis=1)
+    yresult = pd.concat([yresult, df_combined_accuracy], axis=1)
+
+    df_r2[df_r2<0]=0
+    ex = 1-df_r2
+    ey = rmse/max(rmse)
+    exy= pd.Series( np.sqrt(ex*ex+ey*ey),  name = 'r2rmse'  )
+    xresult = pd.concat([xresult, exy], axis=1)
+    yresult = pd.concat([yresult, exy], axis=1)
+
+    ez = df_mape/max(df_mape)
+    exyz= pd.Series( np.sqrt(ex*ex+ey*ey+ez*ez),  name = 'r2rmsemape'  )
+    xresult = pd.concat([xresult, exyz], axis=1)
+    yresult = pd.concat([yresult, exyz], axis=1)
+
+    return xresult, yresult
+
+
 def one_to_one_match_plot(df_y):
     ''' plots the one to one plot of modeled v.s. observed values 
         df_y: model output dataframe with the last row targets values
