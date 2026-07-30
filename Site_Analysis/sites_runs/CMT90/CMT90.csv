@@ -1,0 +1,25 @@
+panel,metric,item,value
+PFT Comparison,GPP,DwarfShub,0.11810166871065553
+PFT Comparison,GPP,Sedge,-0.024431971597463187
+PFT Comparison,GPP,Cryptogam,-0.3990312017427544
+PFT Comparison,NPP,DwarfShub,-0.015511306847229123
+PFT Comparison,NPP,Sedge,-0.004562195680551745
+PFT Comparison,NPP,Cryptogam,0.013842294700249225
+PFT Comparison,$C_{leaf}$,DwarfShub,0.6370671881793816
+PFT Comparison,$C_{leaf}$,Sedge,0.09638623312421021
+PFT Comparison,$C_{leaf}$,Cryptogam,0.22907998875960423
+PFT Comparison,$C_{stem}$,DwarfShub,-0.219742007321445
+PFT Comparison,$C_{stem}$,Sedge,-0.03052614906903206
+PFT Comparison,$C_{root}$,DwarfShub,-0.37742447083164987
+PFT Comparison,$C_{root}$,Sedge,0.09664844887322989
+PFT Comparison,$N_{leaf}$,DwarfShub,0.5172053316734015
+PFT Comparison,$N_{leaf}$,Sedge,0.08727138345776077
+PFT Comparison,$N_{leaf}$,Cryptogam,0.195622791174892
+PFT Comparison,$N_{stem}$,DwarfShub,-0.08565512776799049
+PFT Comparison,$N_{stem}$,Sedge,0.06757722018134127
+PFT Comparison,$N_{root}$,DwarfShub,-0.47953999297050376
+PFT Comparison,$N_{root}$,Sedge,0.07647101932148914
+Soil Comparison,Soils,SHLWC,0.00840489715980761
+Soil Comparison,Soils,DEEPC,0.0021254559212512125
+Soil Comparison,Soils,MINEC,-0.7268061866960907
+Soil Comparison,Soils,AVLN,-0.00014322457781328776

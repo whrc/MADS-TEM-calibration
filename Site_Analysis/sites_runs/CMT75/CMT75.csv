@@ -1,0 +1,21 @@
+panel,metric,item,value
+PFT Comparison,GPP,EverShrub,0.006018224294728036
+PFT Comparison,GPP,DecidShrub,-0.04043775752869083
+PFT Comparison,GPP,Moss,0.043304492545679474
+PFT Comparison,NPP,EverShrub,-0.3979812917481591
+PFT Comparison,NPP,DecidShrub,0.021527222978943494
+PFT Comparison,NPP,Moss,-0.023199483734310022
+PFT Comparison,$C_{leaf}$,EverShrub,-0.05575051601104038
+PFT Comparison,$C_{leaf}$,DecidShrub,-0.12641414106245827
+PFT Comparison,$C_{leaf}$,Moss,0.4495572919339563
+PFT Comparison,$C_{stem}$,EverShrub,-0.051574865727732594
+PFT Comparison,$C_{root}$,EverShrub,-0.8882085425426524
+PFT Comparison,$N_{leaf}$,EverShrub,-0.01078223692783263
+PFT Comparison,$N_{leaf}$,DecidShrub,-0.01414578543130815
+PFT Comparison,$N_{leaf}$,Moss,0.02109734784785454
+PFT Comparison,$N_{stem}$,EverShrub,-0.00422175789036933
+PFT Comparison,$N_{root}$,EverShrub,0.8280645428749625
+Soil Comparison,Soils,SHLWC,0.022152112115962228
+Soil Comparison,Soils,DEEPC,0.37195264136814754
+Soil Comparison,Soils,MINEC,-0.04507906650281546
+Soil Comparison,Soils,AVLN,-0.00021727603733422168

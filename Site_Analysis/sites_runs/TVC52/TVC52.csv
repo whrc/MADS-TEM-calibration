@@ -1,0 +1,9 @@
+panel,metric,item,value
+PFT Comparison,GPP,Lichen,0.14447001404746285
+PFT Comparison,NPP,Lichen,0.1472917585463398
+PFT Comparison,$C_{leaf}$,Lichen,0.11324008980449196
+PFT Comparison,$N_{leaf}$,Lichen,0.20951649507522419
+Soil Comparison,Soils,SHLWC,5.120169118557477e-05
+Soil Comparison,Soils,DEEPC,-0.012129355074839705
+Soil Comparison,Soils,MINEC,-0.48994274495173795
+Soil Comparison,Soils,AVLN,-7.796693503651832e-06

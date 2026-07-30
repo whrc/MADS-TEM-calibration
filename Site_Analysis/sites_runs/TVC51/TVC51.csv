@@ -1,0 +1,19 @@
+panel,metric,item,value
+PFT Comparison,GPP,Sedge,-0.03923251910713843
+PFT Comparison,GPP,Sphag,0.013218398667076081
+PFT Comparison,GPP,Lichen,-0.006810989050031857
+PFT Comparison,NPP,Sedge,0.2246979923472351
+PFT Comparison,NPP,Sphag,0.11409503910928998
+PFT Comparison,NPP,Lichen,0.012958834684951043
+PFT Comparison,$C_{leaf}$,Sedge,-0.0693838495642245
+PFT Comparison,$C_{leaf}$,Sphag,0.20571682204663366
+PFT Comparison,$C_{leaf}$,Lichen,-0.0018600226299084754
+PFT Comparison,$C_{root}$,Sedge,-0.016964891339370028
+PFT Comparison,$N_{leaf}$,Sedge,0.6187906356920353
+PFT Comparison,$N_{leaf}$,Sphag,0.7689545695860647
+PFT Comparison,$N_{leaf}$,Lichen,0.07043136647916398
+PFT Comparison,$N_{root}$,Sedge,-0.018512491145624463
+Soil Comparison,Soils,SHLWC,0.048261732573912114
+Soil Comparison,Soils,DEEPC,-0.05641251382477275
+Soil Comparison,Soils,MINEC,-0.37756390366577697
+Soil Comparison,Soils,AVLN,-2.3390473536508916e-06

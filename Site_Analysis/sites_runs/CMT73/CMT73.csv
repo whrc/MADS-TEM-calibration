@@ -1,0 +1,23 @@
+panel,metric,item,value
+PFT Comparison,GPP,Sedge,-0.08267311288484847
+PFT Comparison,GPP,Shrub,-0.14294819293013872
+PFT Comparison,GPP,Moss,0.0062362696593726286
+PFT Comparison,NPP,Sedge,-0.27211509122299393
+PFT Comparison,NPP,Shrub,-0.22684162388749407
+PFT Comparison,NPP,Moss,-0.00948814826448477
+PFT Comparison,$C_{leaf}$,Sedge,0.02980935146134217
+PFT Comparison,$C_{leaf}$,Shrub,0.33510656416028944
+PFT Comparison,$C_{leaf}$,Moss,0.11371887742110283
+PFT Comparison,$C_{stem}$,Sedge,-0.25937465614873917
+PFT Comparison,$C_{root}$,Sedge,-0.582033348966623
+PFT Comparison,$C_{root}$,Shrub,-0.021026508957719875
+PFT Comparison,$N_{leaf}$,Sedge,0.03631257567373136
+PFT Comparison,$N_{leaf}$,Shrub,0.5566132997719855
+PFT Comparison,$N_{leaf}$,Moss,0.15997543033499254
+PFT Comparison,$N_{stem}$,Sedge,-0.11838308957736296
+PFT Comparison,$N_{root}$,Sedge,-0.5662111166030456
+PFT Comparison,$N_{root}$,Shrub,-0.022144993785562624
+Soil Comparison,Soils,SHLWC,0.0036967788053242634
+Soil Comparison,Soils,DEEPC,0.00586293167193086
+Soil Comparison,Soils,MINEC,-0.2413698596335765
+Soil Comparison,Soils,AVLN,4.154007955163706e-05
