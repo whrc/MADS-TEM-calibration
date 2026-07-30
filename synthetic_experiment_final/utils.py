@@ -156,6 +156,8 @@ def get_best_match(x,y):
 
     df_r2[df_r2<0]=0
     ex = 1-df_r2
+    print('rmse:',type(rmse))
+    print('max',type(max(rmse)))
     ey = rmse/max(rmse)
     exy= pd.Series( np.sqrt(ex*ex+ey*ey),  name = 'r2rmse'  )
     xresult = pd.concat([xresult, exy], axis=1)
